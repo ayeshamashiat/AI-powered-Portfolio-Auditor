@@ -1,30 +1,63 @@
-from fastapi import APIRouter, FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 import httpx
-import os
-from dotenv import load_dotenv
+
 from services.github_service import get_user_repos
 from services.scoring_service import calculate_repo_score
 
 router = APIRouter()
 
+
 @router.post("/audit/github")
 async def audit_github(username: str):
     try:
         repos = await get_user_repos(username)
+
         if not repos:
-            raise HTTPException(status_code=404, detail="No repositories found for this user")
-        
+            raise HTTPException(
+                status_code=404,
+                detail="No repositories found"
+            )
+
         audit_results = []
+        total_score = 0
+
         for repo in repos:
-            score = await calculate_repo_score(repo)
+            result = await calculate_repo_score(repo)
+
+            total_score += result["score"]
+
             audit_results.append({
                 "repo_name": repo.get("name"),
-                "score": score
+                "score": result["score"],
+                "issues": result["issues"]
             })
-        
-        return {"username": username, "audit_results": audit_results}
-    
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=str(e))
+
+        portfolio_score = round(
+            total_score / len(repos),
+            2
+        )
+
+        return {
+            "username": username,
+            "repo_count": len(repos),
+            "portfolio_score": portfolio_score,
+            "audit_results": audit_results
+        }
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+        )
+
+    except httpx.HTTPError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"GitHub API Error: {str(e)}"
+        )
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )

@@ -16,7 +16,9 @@ import {
   Flame,
   Award,
   GitBranch,
+  Link,
 } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -115,7 +117,15 @@ function DashboardContent() {
             </span>
           </div>
           <h2 className="text-lg md:text-xl font-black text-white flex items-center gap-1.5 uppercase">
-            TARGET: <span className="text-neon-cyan neon-glow-cyan">@{data.username}</span>
+            TARGET:
+            <a
+              href={`https://github.com/${data.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-neon-cyan neon-glow-cyan hover:underline cursor-pointer"
+            >
+              @{data.username}
+            </a>
           </h2>
         </div>
 

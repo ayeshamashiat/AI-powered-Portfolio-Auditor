@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 import httpx
 import asyncio
 
-from services.github_service import get_user_repos
-from services.scoring_service import calculate_repo_score
+from ..services.github_service import get_user_repos
+from ..services.scoring_service import calculate_repo_score
 
 router = APIRouter()
 

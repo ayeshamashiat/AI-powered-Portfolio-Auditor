@@ -1,4 +1,4 @@
-from services.github_service import (
+from app.services.github_service import (
     has_readme,
     get_topics
 )
